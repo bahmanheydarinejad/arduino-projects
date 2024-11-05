@@ -1,0 +1,2 @@
+function validate(){var a=document.getElementById("s").value;if(a.replace(/^\s+(.*?)\s+$/,'$1')==''){alert('Search keywords cannot be empty.');return false;}}
+function pagedSearch(index){document.getElementById("curPage").value=index;document.getElementById("searchForm").submit();}

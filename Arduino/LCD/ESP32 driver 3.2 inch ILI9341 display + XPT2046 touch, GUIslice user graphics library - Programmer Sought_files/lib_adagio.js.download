@@ -1,0 +1,57 @@
+const keySessionLastActivity = 'sessionLastActivity';
+const keySessionBatchKeyword = 'sessionBatchKeyword';
+const batchKeywordClient = 'revenue-launch-batch1-client';
+const batchKeywordServer = 'revenue-launch-batch1-server';
+
+function canAccessTopWindow() {
+    try {
+        if (window.top.location.href) {
+            return true;
+        }
+    } catch (error) {
+        // console.log('canAccessTopWindow', error);
+        return false;
+    }
+};
+
+function getWindow() {
+    return canAccessTopWindow() ? window.top : window.self;
+};
+
+function getBatchKeyword() {
+    let batchKeyword = batchKeywordClient; // Default to client in case of error
+
+    try {
+        const w = getWindow();
+        const ls = w.localStorage;
+        if (!ls) {
+            // console.error('localStorage is not supported');
+            return batchKeyword;
+        }
+
+        // Get the current timestamp
+        const currentTime = new Date().getTime();
+
+        // Reset the session after 30 minutes of inactivity
+        if (ls.getItem(keySessionLastActivity)) {
+            const sessionLastActivityTime = parseInt(ls.getItem(keySessionLastActivity));
+            if (currentTime - sessionLastActivityTime > 30 * 60 * 1000) {
+                ls.removeItem(keySessionBatchKeyword);
+            }
+        }
+        // Record the session activity
+        ls.setItem(keySessionLastActivity, currentTime.toString());
+
+        // Get or set the batch keyword
+        if (ls.getItem(keySessionBatchKeyword)) {
+            batchKeyword = ls.getItem(keySessionBatchKeyword);
+        } else {
+            batchKeyword = Math.random() < 0.5 ? batchKeywordClient : batchKeywordServer;
+            ls.setItem(keySessionBatchKeyword, batchKeyword);
+        }
+    } catch (error) {
+        // console.error('getBatchKeyword', error);
+    }
+
+    return batchKeyword;
+}
