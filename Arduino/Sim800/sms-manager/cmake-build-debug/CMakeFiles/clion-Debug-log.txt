@@ -1,0 +1,1 @@
+CMakeLists.txt not found in C:\Users\Bahma\Documents\GitHub\arduino-projects\Arduino\Sim800\sms-manager Select CMakeLists.txt
