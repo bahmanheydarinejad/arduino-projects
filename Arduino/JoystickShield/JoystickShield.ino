@@ -26,6 +26,12 @@ public:
   virtual ~MyUpdatable() {}
 };
 
+class MyActionable {
+public:
+  virtual void action() = 0;
+  virtual ~MyActionable() {}
+};
+
 class MyPrintable {
 public:
   virtual void print() = 0;
@@ -36,32 +42,53 @@ public:
 class SimpleJoyStickPad;
 
 // Button base class
-class Button : public MyUpdatable {
+class Button : public MyUpdatable, public MyActionable {
 protected:
   int pin;
   const char* name;
   bool lastState;
-  int* targetState;
+  int* targetAction;
   MyPrintable* parent;
 
 public:
   Button(int p, const char* n, int* target, MyPrintable* parent)
-    : pin(p), name(n), lastState(HIGH), targetState(target), parent(parent) {
+    : pin(p), name(n), lastState(HIGH), targetAction(target), parent(parent) {
     pinMode(pin, INPUT_PULLUP);
   }
 
-  void update() override;
+  void update() {
+    bool currentState = digitalRead(pin);
+    *targetAction = retrieveAction(currentState);
+    lastState = currentState;
+    action();
+  }
 
-  int evaluateState(bool current) {
-    if (lastState == HIGH && current == LOW) return 2;  // Pressed
-    if (lastState == LOW && current == HIGH) return 3;  // Released
-    if (lastState == LOW && current == LOW) return 1;   // Hold
-    return 0;                                           // Unhold
+  int retrieveAction(bool current) {
+    if (isReleased(current)) return 3;      // Released
+    else if (isPressed(current)) return 2;  // Pressed
+    else if (isHold(current)) return 1;     // Hold
+    else return 0;                          // Unhold
+  }
+
+  void action() {
+    if (parent && *targetAction != 0) parent->print();
+  }
+
+  virtual bool isPressed(bool state) {
+    return lastState == HIGH && state == LOW;
+  }
+
+  virtual bool isReleased(bool state) {
+    return lastState == LOW && state == HIGH;
+  }
+
+  virtual bool isHold(bool state) {
+    return lastState == LOW && state == LOW;
   }
 };
 
 // Joystick class
-class Joystick : public MyUpdatable {
+class Joystick : public MyUpdatable, public MyActionable {
 private:
   int xPin, yPin;
   const char* name;
@@ -76,14 +103,24 @@ public:
     pinMode(yPin, INPUT);
   }
 
+  bool isJoystickMoved(int xValue, int yValue) {
+    bool isXMoved = xValue < surfaceBound || xValue > floorBound;
+    bool isYMoved = yValue < surfaceBound || yValue > floorBound;
+    return isXMoved || isYMoved;
+  }
+
   void update() override {
     int xVal = analogRead(xPin);
     int yVal = analogRead(yPin);
+    // *xTarget = map(xVal, 0, 1023, -1024, 1024);
+    // *yTarget = map(yVal, 0, 1023, -1024, 1024);
+    *xTarget = xVal;
+    *yTarget = yVal;
+  }
 
-    *xTarget = map(xVal, 0, 1023, -1024, 1024);
-    *yTarget = map(yVal, 0, 1023, -1024, 1024);
-
-    if (parent) parent->print();
+  void action() {
+    bool isMoved = isJoystickMoved(*xTarget, *yTarget);
+    if (isMoved && parent) parent->print();
   }
 };
 
@@ -125,36 +162,28 @@ public:
   }
 
   void print() {
-    Serial.print("A:\t");
+    Serial.print("A:");
     Serial.print(data.A);
-    Serial.print("\tB:\t");
+    Serial.print("\tB:");
     Serial.print(data.B);
-    Serial.print("\tC:\t");
+    Serial.print("\tC:");
     Serial.print(data.C);
-    Serial.print("\tD:\t");
+    Serial.print("\tD:");
     Serial.print(data.D);
-    Serial.print("\tE:\t");
+    Serial.print("\tE:");
     Serial.print(data.E);
-    Serial.print("\tF:\t");
+    Serial.print("\tF:");
     Serial.print(data.F);
-    Serial.print("\tSW:\t");
+    Serial.print("\tSW:");
     Serial.print(data.SW);
-    Serial.print("\tUNK:\t");
+    Serial.print("\tUNK:");
     Serial.print(data.UNKNOWN);
-    Serial.print("\tX:\t");
+    Serial.print("\tX:");
     Serial.print(data.X);
-    Serial.print("\tY:\t");
+    Serial.print("\tY:");
     Serial.println(data.Y);
   }
 };
-
-// Button update implementation
-void Button::update() {
-  bool currentState = digitalRead(pin);
-  *targetState = evaluateState(currentState);
-  lastState = currentState;
-  if (parent) parent->print();
-}
 
 // Create the joystick pad instance
 SimpleJoyStickPad simplePad;
