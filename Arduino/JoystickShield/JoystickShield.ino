@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
 // Precision for joystick neutrality
-const int joystickPrecision = 10;
-const int floorBound = 512 + joystickPrecision;
-const int surfaceBound = 512 - joystickPrecision;
+const int joystickPrecision = 15;
+const int floorBound = joystickPrecision;
+const int surfaceBound = -joystickPrecision;
 
 // Struct to hold all input states
 struct JoyStickPadData {
@@ -114,8 +114,9 @@ public:
     int yVal = analogRead(yPin);
     // *xTarget = map(xVal, 0, 1023, -1024, 1024);
     // *yTarget = map(yVal, 0, 1023, -1024, 1024);
-    *xTarget = xVal;
-    *yTarget = yVal;
+    *xTarget = xVal - 512;
+    *yTarget = yVal - 512;
+    action();
   }
 
   void action() {
@@ -162,26 +163,9 @@ public:
   }
 
   void print() {
-    Serial.print("A:");
-    Serial.print(data.A);
-    Serial.print("\tB:");
-    Serial.print(data.B);
-    Serial.print("\tC:");
-    Serial.print(data.C);
-    Serial.print("\tD:");
-    Serial.print(data.D);
-    Serial.print("\tE:");
-    Serial.print(data.E);
-    Serial.print("\tF:");
-    Serial.print(data.F);
-    Serial.print("\tSW:");
-    Serial.print(data.SW);
-    Serial.print("\tUNK:");
-    Serial.print(data.UNKNOWN);
-    Serial.print("\tX:");
-    Serial.print(data.X);
-    Serial.print("\tY:");
-    Serial.println(data.Y);
+    char buf[100];
+    sprintf(buf, "\rA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d\tSW:%d\tUNK:%d\tX:%d\tY:%d", data.A, data.B, data.C, data.D, data.E, data.F, data.SW, data.UNKNOWN, data.X, data.Y);
+    Serial.println(buf);
   }
 };
 
@@ -193,6 +177,6 @@ void setup() {
 }
 
 void loop() {
-  simplePad.update();
+  simplePad.getSimpleJoyStickPadData();
   delay(10);  // Slight delay to avoid flooding
 }
