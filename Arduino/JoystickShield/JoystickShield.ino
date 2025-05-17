@@ -32,12 +32,6 @@ public:
   virtual ~MyActionable() {}
 };
 
-class MyPrintable {
-public:
-  virtual void print() = 0;
-  virtual ~MyPrintable() {}
-};
-
 // Forward declaration
 class SimpleJoyStickPad;
 
@@ -48,10 +42,10 @@ protected:
   const char* name;
   bool lastState;
   int* targetAction;
-  MyPrintable* parent;
+  MyActionable* parent;
 
 public:
-  Button(int p, const char* n, int* target, MyPrintable* parent)
+  Button(int p, const char* n, int* target, MyActionable* parent)
     : pin(p), name(n), lastState(HIGH), targetAction(target), parent(parent) {
     pinMode(pin, INPUT_PULLUP);
   }
@@ -71,7 +65,7 @@ public:
   }
 
   void action() {
-    if (parent && *targetAction != 0) parent->print();
+    if (parent && *targetAction != 0) parent->action();
   }
 
   virtual bool isPressed(bool state) {
@@ -94,10 +88,10 @@ private:
   const char* name;
   int* xTarget;
   int* yTarget;
-  MyPrintable* parent;
+  MyActionable* parent;
 
 public:
-  Joystick(int x, int y, const char* n, int* xT, int* yT, MyPrintable* parent)
+  Joystick(int x, int y, const char* n, int* xT, int* yT, MyActionable* parent)
     : xPin(x), yPin(y), name(n), xTarget(xT), yTarget(yT), parent(parent) {
     pinMode(xPin, INPUT);
     pinMode(yPin, INPUT);
@@ -121,12 +115,12 @@ public:
 
   void action() {
     bool isMoved = isJoystickMoved(*xTarget, *yTarget);
-    if (isMoved && parent) parent->print();
+    if (isMoved && parent) parent->action();
   }
 };
 
 // Forward declaration for SimpleJoyStickPad
-class SimpleJoyStickPad : public MyPrintable {
+class SimpleJoyStickPad : public MyActionable {
 private:
   JoyStickPadData data;
 
@@ -162,7 +156,7 @@ public:
     return data;
   }
 
-  void print() {
+  void action() {
     char buf[100];
     sprintf(buf, "\rA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d\tSW:%d\tUNK:%d\tX:%d\tY:%d", data.A, data.B, data.C, data.D, data.E, data.F, data.SW, data.UNKNOWN, data.X, data.Y);
     Serial.println(buf);
