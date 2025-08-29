@@ -19,7 +19,7 @@ struct JoyStickPadData {
   int8_t SW = 0;
   int16_t X = 0;
   int16_t Y = 0;
-};
+} __attribute__((packed));
 
 // Abstract updateable interface
 class MyUpdatable {
