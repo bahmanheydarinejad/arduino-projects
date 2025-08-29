@@ -1,22 +1,24 @@
 #include <Arduino.h>
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 // Precision for joystick neutrality
-const int joystickPrecision = 15;
-const int floorBound = joystickPrecision;
-const int surfaceBound = -joystickPrecision;
+const int16_t joystickPrecision = 15;
+const int16_t surfaceBound = joystickPrecision;
+const int16_t floorBound = -joystickPrecision;
 
 // Struct to hold all input states
 struct JoyStickPadData {
-  int A = 0;
-  int B = 0;
-  int C = 0;
-  int D = 0;
-  int E = 0;
-  int F = 0;
-  int SW = 0;
-  int UNKNOWN = 0;
-  int X = 0;
-  int Y = 0;
+  int8_t A = 0;
+  int8_t B = 0;
+  int8_t C = 0;
+  int8_t D = 0;
+  int8_t E = 0;
+  int8_t F = 0;
+  int8_t SW = 0;
+  int16_t X = 0;
+  int16_t Y = 0;
 };
 
 // Abstract updateable interface
@@ -32,25 +34,22 @@ public:
   virtual ~MyActionable() {}
 };
 
-// Forward declaration
-class SimpleJoyStickPad;
-
 // Button base class
 class Button : public MyUpdatable, public MyActionable {
 protected:
   int pin;
   const char* name;
   bool lastState;
-  int* targetAction;
+  int8_t* targetAction;
   MyActionable* parent;
 
 public:
-  Button(int p, const char* n, int* target, MyActionable* parent)
+  Button(int p, const char* n, int8_t* target, MyActionable* parent)
     : pin(p), name(n), lastState(HIGH), targetAction(target), parent(parent) {
     pinMode(pin, INPUT_PULLUP);
   }
 
-  void update() {
+  void update() override {
     bool currentState = digitalRead(pin);
     *targetAction = retrieveAction(currentState);
     lastState = currentState;
@@ -64,7 +63,7 @@ public:
     else return 0;                          // Unhold
   }
 
-  void action() {
+  void action() override {
     if (parent && *targetAction != 0) parent->action();
   }
 
@@ -86,49 +85,62 @@ class Joystick : public MyUpdatable, public MyActionable {
 private:
   int xPin, yPin;
   const char* name;
-  int* xTarget;
-  int* yTarget;
+  int16_t* xTarget;
+  int16_t* yTarget;
   MyActionable* parent;
 
 public:
-  Joystick(int x, int y, const char* n, int* xT, int* yT, MyActionable* parent)
+  Joystick(int x, int y, const char* n, int16_t* xT, int16_t* yT, MyActionable* parent)
     : xPin(x), yPin(y), name(n), xTarget(xT), yTarget(yT), parent(parent) {
     pinMode(xPin, INPUT);
     pinMode(yPin, INPUT);
   }
 
-  bool isJoystickMoved(int xValue, int yValue) {
-    bool isXMoved = xValue < surfaceBound || xValue > floorBound;
-    bool isYMoved = yValue < surfaceBound || yValue > floorBound;
+  bool isJoystickMoved() {
+    bool isXMoved = *xTarget < floorBound || *xTarget > surfaceBound;
+    bool isYMoved = *yTarget < floorBound || *yTarget > surfaceBound;
     return isXMoved || isYMoved;
   }
 
   void update() override {
-    int xVal = analogRead(xPin);
-    int yVal = analogRead(yPin);
-    // *xTarget = map(xVal, 0, 1023, -1024, 1024);
-    // *yTarget = map(yVal, 0, 1023, -1024, 1024);
+    int16_t xVal = analogRead(xPin);
+    int16_t yVal = analogRead(yPin);
     *xTarget = xVal - 512;
     *yTarget = yVal - 512;
     action();
   }
 
-  void action() {
-    bool isMoved = isJoystickMoved(*xTarget, *yTarget);
+  void action() override {
+    bool isMoved = isJoystickMoved();
     if (isMoved && parent) parent->action();
   }
 };
 
-// Forward declaration for SimpleJoyStickPad
+// SimpleJoyStickPad
 class SimpleJoyStickPad : public MyActionable {
 private:
   JoyStickPadData data;
-
-  Button* buttons[8];
+  Button* buttons[7];
   Joystick* joystick;
 
+  RF24& radio;
+  int ledSuccess;
+  int ledFail;
+
 public:
-  SimpleJoyStickPad() {
+  SimpleJoyStickPad(RF24& r, const byte* address, int successLed, int failLed)
+    : radio(r), ledSuccess(successLed), ledFail(failLed) {
+
+    pinMode(ledSuccess, OUTPUT);
+    pinMode(ledFail, OUTPUT);
+    digitalWrite(ledSuccess, LOW);
+    digitalWrite(ledFail, LOW);
+
+    radio.begin();
+    radio.openWritingPipe(address);
+    radio.setPALevel(RF24_PA_HIGH);
+    radio.stopListening();
+
     buttons[0] = new Button(2, "A", &data.A, this);
     buttons[1] = new Button(3, "B", &data.B, this);
     buttons[2] = new Button(4, "C", &data.C, this);
@@ -136,41 +148,69 @@ public:
     buttons[4] = new Button(6, "E", &data.E, this);
     buttons[5] = new Button(7, "F", &data.F, this);
     buttons[6] = new Button(8, "SW", &data.SW, this);
-    buttons[7] = new Button(9, "UNKNOWN", &data.UNKNOWN, this);
 
     joystick = new Joystick(A0, A1, "Joystick", &data.X, &data.Y, this);
   }
 
   ~SimpleJoyStickPad() {
-    for (int i = 0; i < 8; i++) delete buttons[i];
+    for (int i = 0; i < 7; i++) delete buttons[i];
     delete joystick;
   }
 
   void update() {
-    for (int i = 0; i < 8; i++) buttons[i]->update();
+    for (int i = 0; i < 7; i++) buttons[i]->update();
     joystick->update();
   }
 
   JoyStickPadData getSimpleJoyStickPadData() {
-    update();  // Always updates data before returning
+    update();
     return data;
   }
 
-  void action() {
-    char buf[100];
-    sprintf(buf, "\rA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d\tSW:%d\tUNK:%d\tX:%d\tY:%d", data.A, data.B, data.C, data.D, data.E, data.F, data.SW, data.UNKNOWN, data.X, data.Y);
+  void action() override {
+    bool report = radio.write(&data, sizeof(data));
+
+    if (report) {
+      digitalWrite(ledSuccess, HIGH);
+      digitalWrite(ledFail, LOW);
+    } else {
+      digitalWrite(ledSuccess, LOW);
+      digitalWrite(ledFail, HIGH);
+    }
+
+    char buf[120];
+    sprintf(buf,
+            "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d\tSW:%d\tX:%d\tY:%d",
+            report ? "OK" : "FAIL",
+            data.A, data.B, data.C, data.D,
+            data.E, data.F, data.SW, data.X, data.Y);
     Serial.println(buf);
   }
 };
 
-// Create the joystick pad instance
-SimpleJoyStickPad simplePad;
+// ====== GLOBALS ======
+RF24 radio(9, 10);  // CE, CSN
+const byte address[6] = "00001";
+
+const int ledSuccess = A4;
+const int ledFail = A5;
+
+SimpleJoyStickPad* simplePad;
 
 void setup() {
   Serial.begin(9600);
+  simplePad = new SimpleJoyStickPad(radio, address, ledSuccess, ledFail);
 }
 
 void loop() {
-  simplePad.getSimpleJoyStickPadData();
-  delay(10);  // Slight delay to avoid flooding
+  simplePad->update();
+  // برای تست چاپ دائم
+  // Serial.println("Loop running");
+  // delay(500);
+
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(20);
+  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(ledSuccess, LOW);
+  digitalWrite(ledFail, LOW);
 }
