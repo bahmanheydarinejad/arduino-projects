@@ -99,14 +99,19 @@ public:
   bool isJoystickMoved() {
     bool isXMoved = *xTarget < floorBound || *xTarget > surfaceBound;
     bool isYMoved = *yTarget < floorBound || *yTarget > surfaceBound;
+
+    if (!isXMoved)
+      *xTarget = 0;
+
+    if (!isYMoved)
+      *yTarget = 0;
+
     return isXMoved || isYMoved;
   }
 
   void update() override {
-    int16_t xVal = analogRead(xPin);
-    int16_t yVal = analogRead(yPin);
-    *xTarget = xVal - 512;
-    *yTarget = yVal - 512;
+    *xTarget = analogRead(xPin) - 512;
+    *yTarget = analogRead(yPin) - 512;
     action();
   }
 
