@@ -144,26 +144,26 @@ public:
     }
 
     joystick1 = new Joystick("JS1", pins[6], pins[7], pins[8], &data.X1, &data.Y1, &data.SW1, this);
-    // joystick2 = new Joystick("JS2", pins[9], pins[10], pins[11], &data.X2, &data.Y2, &data.SW2, this);
+    joystick2 = new Joystick("JS2", pins[9], pins[10], pins[11], &data.X2, &data.Y2, &data.SW2, this);
   }
 
   ~SimpleJoyStickPad() {
     for (int i = 0; i < BUTTON_COUNT; i++) delete buttons[i];
     delete joystick1;
-    // delete joystick2;
+    delete joystick2;
   }
 
   void update() {
     for (int i = 0; i < BUTTON_COUNT; i++) buttons[i]->update();
     joystick1->update();
-    // joystick2->update();
+    joystick2->update();
   }
 
   bool isChanged() {
     bool changed = false;
     for (int i = 0; i < BUTTON_COUNT; i++) changed = buttons[i]->isChanged() || changed;
     changed = joystick1->isChanged() || changed;
-    // changed = joystick2->isChanged() || changed;
+    changed = joystick2->isChanged() || changed;
     return changed;
   }
 
@@ -177,7 +177,7 @@ public:
 RF24 radio(9, 10);  // CE, CSN
 const byte address[6] = "00001";
 
-const int padPins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A3, A4, A5 };
+const int padPins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A0, A1, A2 };
 const int ledStatus = 8;
 
 SimpleJoyStickPad simplePad(padPins);

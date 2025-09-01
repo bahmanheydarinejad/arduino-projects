@@ -22,11 +22,12 @@ struct JoyStickPadData {
 } __attribute__((packed));
 
 void printData(const JoyStickPadData &data) {
-  bool report = 1;
+  bool r = 1;
   char buf[120];
   sprintf(buf,
-          "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d\tSW1:%d\tX1:%d\tY1:%d\tSW2:%d\tX2:%d\tY2:%d",
-          report ? "OK" : "FAIL",
+          "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d"
+          "\tSW1:%d\tX1:%d\tY1:%d\tSW2:%d\tX2:%d\tY2:%d",
+          r ? "OK" : "FAIL",
           data.A, data.B, data.C, data.D,
           data.E, data.F,
           data.SW1, data.X1, data.Y1,
