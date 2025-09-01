@@ -16,44 +16,45 @@ struct JoyStickPadData {
   int8_t D = 0;
   int8_t E = 0;
   int8_t F = 0;
-  int8_t SW = 0;
-  int16_t X = 0;
-  int16_t Y = 0;
+  int8_t SW1 = 0;
+  int16_t X1 = 0;
+  int16_t Y1 = 0;
+  int8_t SW2 = 0;
+  int16_t X2 = 0;
+  int16_t Y2 = 0;
 } __attribute__((packed));
 
 // Abstract updateable interface
-class MyUpdatable {
+class Updatable {
 public:
   virtual void update() = 0;
-  virtual ~MyUpdatable() {}
-};
-
-class MyActionable {
-public:
-  virtual void action() = 0;
-  virtual ~MyActionable() {}
+  virtual bool isChanged() = 0;
+  virtual ~Updatable() {}
 };
 
 // Button base class
-class Button : public MyUpdatable, public MyActionable {
+class Button : public Updatable {
 protected:
   int pin;
   const char* name;
   bool lastState;
-  int8_t* targetAction;
-  MyActionable* parent;
+  int8_t* value;
+  Updatable* parent;
 
 public:
-  Button(int p, const char* n, int8_t* target, MyActionable* parent)
-    : pin(p), name(n), lastState(HIGH), targetAction(target), parent(parent) {
+  Button(int pin, const char* name, int8_t* value, Updatable* parent)
+    : pin(pin), name(name), lastState(HIGH), value(value), parent(parent) {
     pinMode(pin, INPUT_PULLUP);
+  }
+
+  bool isChanged() {
+    return *value != 0;
   }
 
   void update() override {
     bool currentState = digitalRead(pin);
-    *targetAction = retrieveAction(currentState);
+    *value = retrieveAction(currentState);
     lastState = currentState;
-    action();
   }
 
   int retrieveAction(bool current) {
@@ -63,11 +64,7 @@ public:
     else return 0;                          // Unhold
   }
 
-  void action() override {
-    if (parent && *targetAction != 0) parent->action();
-  }
-
-  virtual bool isPressed(bool state) {
+  bool isPressed(bool state) {
     return lastState == HIGH && state == LOW;
   }
 
@@ -81,115 +78,98 @@ public:
 };
 
 // Joystick class
-class Joystick : public MyUpdatable, public MyActionable {
+class Joystick : public Updatable {
 private:
   int xPin, yPin;
   const char* name;
-  int16_t* xTarget;
-  int16_t* yTarget;
-  MyActionable* parent;
+  int16_t* xValue;
+  int16_t* yValue;
+  Button* swButton;
+  Updatable* parent;
 
 public:
-  Joystick(int x, int y, const char* n, int16_t* xT, int16_t* yT, MyActionable* parent)
-    : xPin(x), yPin(y), name(n), xTarget(xT), yTarget(yT), parent(parent) {
+  Joystick(char* name, int xPin, int yPin, int swPin, int16_t* xValue, int16_t* yValue, int8_t* swValue, Updatable* parent)
+    : name(name), xPin(xPin), yPin(yPin), xValue(xValue), yValue(yValue), parent(parent) {
     pinMode(xPin, INPUT);
     pinMode(yPin, INPUT);
+
+    char swName[10];
+    snprintf(swName, sizeof(swName), "%s_SW", name);
+    swButton = new Button(swPin, swName, swValue, this);
   }
 
-  bool isJoystickMoved() {
-    bool isXMoved = *xTarget < floorBound || *xTarget > surfaceBound;
-    bool isYMoved = *yTarget < floorBound || *yTarget > surfaceBound;
+  ~Joystick() {
+    delete swButton;
+  }
+
+  virtual bool isChanged() {
+    bool isXMoved = (*xValue < floorBound) || (*xValue > surfaceBound);
+    bool isYMoved = (*yValue < floorBound) || (*yValue > surfaceBound);
 
     if (!isXMoved)
-      *xTarget = 0;
+      *xValue = 0;
 
     if (!isYMoved)
-      *yTarget = 0;
+      *yValue = 0;
 
-    return isXMoved || isYMoved;
+    return isXMoved || isYMoved || this->swButton->isChanged();
   }
 
   void update() override {
-    *xTarget = analogRead(xPin) - 512;
-    *yTarget = analogRead(yPin) - 512;
-    action();
-  }
-
-  void action() override {
-    bool isMoved = isJoystickMoved();
-    if (isMoved && parent) parent->action();
+    *xValue = analogRead(xPin) - 512;
+    *yValue = analogRead(yPin) - 512;
+    this->swButton->update();
   }
 };
 
 // SimpleJoyStickPad
-class SimpleJoyStickPad : public MyActionable {
+class SimpleJoyStickPad : public Updatable {
 private:
-  JoyStickPadData data;
-  Button* buttons[7];
-  Joystick* joystick;
 
-  RF24& radio;
-  int ledSuccess;
-  int ledFail;
+  JoyStickPadData data;
+
+  static constexpr int BUTTON_COUNT = 6;
+  Button* buttons[BUTTON_COUNT];
+
+  Joystick* joystick1;
+  Joystick* joystick2;
 
 public:
-  SimpleJoyStickPad(RF24& r, const byte* address, int successLed, int failLed)
-    : radio(r), ledSuccess(successLed), ledFail(failLed) {
+  SimpleJoyStickPad(const int* pins) {
 
-    pinMode(ledSuccess, OUTPUT);
-    pinMode(ledFail, OUTPUT);
-    digitalWrite(ledSuccess, LOW);
-    digitalWrite(ledFail, LOW);
+    const char* names[BUTTON_COUNT] = { "A", "B", "C", "D", "E", "F" };
+    int8_t* referenceData[BUTTON_COUNT] = { &data.A, &data.B, &data.C, &data.D, &data.E, &data.F };
+    for (int i = 0; i < BUTTON_COUNT; ++i) {
+      buttons[i] = new Button(pins[i], names[i], referenceData[i], this);
+    }
 
-    radio.begin();
-    radio.openWritingPipe(address);
-    radio.setPALevel(RF24_PA_HIGH);
-    radio.stopListening();
-
-    buttons[0] = new Button(2, "A", &data.A, this);
-    buttons[1] = new Button(3, "B", &data.B, this);
-    buttons[2] = new Button(4, "C", &data.C, this);
-    buttons[3] = new Button(5, "D", &data.D, this);
-    buttons[4] = new Button(6, "E", &data.E, this);
-    buttons[5] = new Button(7, "F", &data.F, this);
-    buttons[6] = new Button(8, "SW", &data.SW, this);
-
-    joystick = new Joystick(A0, A1, "Joystick", &data.X, &data.Y, this);
+    joystick1 = new Joystick("JS1", pins[6], pins[7], pins[8], &data.X1, &data.Y1, &data.SW1, this);
+    // joystick2 = new Joystick("JS2", pins[9], pins[10], pins[11], &data.X2, &data.Y2, &data.SW2, this);
   }
 
   ~SimpleJoyStickPad() {
-    for (int i = 0; i < 7; i++) delete buttons[i];
-    delete joystick;
+    for (int i = 0; i < BUTTON_COUNT; i++) delete buttons[i];
+    delete joystick1;
+    // delete joystick2;
   }
 
   void update() {
-    for (int i = 0; i < 7; i++) buttons[i]->update();
-    joystick->update();
+    for (int i = 0; i < BUTTON_COUNT; i++) buttons[i]->update();
+    joystick1->update();
+    // joystick2->update();
   }
 
-  JoyStickPadData getSimpleJoyStickPadData() {
-    update();
+  bool isChanged() {
+    bool changed = false;
+    for (int i = 0; i < BUTTON_COUNT; i++) changed = buttons[i]->isChanged() || changed;
+    changed = joystick1->isChanged() || changed;
+    // changed = joystick2->isChanged() || changed;
+    return changed;
+  }
+
+public:
+  JoyStickPadData getData() {
     return data;
-  }
-
-  void action() override {
-    bool report = radio.write(&data, sizeof(data));
-
-    if (report) {
-      digitalWrite(ledSuccess, HIGH);
-      digitalWrite(ledFail, LOW);
-    } else {
-      digitalWrite(ledSuccess, LOW);
-      digitalWrite(ledFail, HIGH);
-    }
-
-    char buf[120];
-    sprintf(buf,
-            "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d\tSW:%d\tX:%d\tY:%d",
-            report ? "OK" : "FAIL",
-            data.A, data.B, data.C, data.D,
-            data.E, data.F, data.SW, data.X, data.Y);
-    Serial.println(buf);
   }
 };
 
@@ -197,25 +177,52 @@ public:
 RF24 radio(9, 10);  // CE, CSN
 const byte address[6] = "00001";
 
-const int ledSuccess = A4;
-const int ledFail = A5;
+const int padPins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A3, A4, A5 };
+const int ledStatus = 8;
 
-SimpleJoyStickPad* simplePad;
+SimpleJoyStickPad simplePad(padPins);
 
 void setup() {
   Serial.begin(9600);
-  simplePad = new SimpleJoyStickPad(radio, address, ledSuccess, ledFail);
+
+  pinMode(ledStatus, OUTPUT);
+  digitalWrite(ledStatus, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_HIGH);
+  radio.stopListening();
 }
 
 void loop() {
-  simplePad->update();
-  // برای تست چاپ دائم
-  // Serial.println("Loop running");
-  // delay(500);
-
+  simplePad.update();
+  if (simplePad.isChanged()) {
+    bool r = send(simplePad.getData());
+    if (r) {
+      digitalWrite(ledStatus, HIGH);
+    } else {
+      digitalWrite(ledStatus, LOW);
+    }
+  }
   digitalWrite(LED_BUILTIN, HIGH);
   delay(20);
   digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(ledSuccess, LOW);
-  digitalWrite(ledFail, LOW);
+  digitalWrite(ledStatus, LOW);
+}
+
+bool send(const JoyStickPadData& data) {
+  bool r = radio.write(&data, sizeof(data));
+
+  char buf[120];
+  sprintf(buf,
+          "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d"
+          "\tSW1:%d\tX1:%d\tY1:%d\tSW2:%d\tX2:%d\tY2:%d",
+          r ? "OK" : "FAIL",
+          data.A, data.B, data.C, data.D,
+          data.E, data.F,
+          data.SW1, data.X1, data.Y1,
+          data.SW2, data.X2, data.Y2);
+  Serial.println(buf);
+  return r;
 }
