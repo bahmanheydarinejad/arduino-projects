@@ -177,7 +177,7 @@ public:
 RF24 radio(9, 10);  // CE, CSN
 const byte address[6] = "00001";
 
-const int padPins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A0, A1, A2 };
+const int padPins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A3, A4, A5 };
 const int ledStatus = 8;
 
 SimpleJoyStickPad simplePad(padPins);
