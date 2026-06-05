@@ -1,52 +1,84 @@
+#include <Arduino.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
 
-RF24 radio(9, 10);  // CE, CSN
-const byte address[6] = "00001";
+RF24 radio(9, 10);
 
-// Struct to hold all input states
-struct JoyStickPadData {
-  int8_t A = 0;
-  int8_t B = 0;
-  int8_t C = 0;
-  int8_t D = 0;
-  int8_t E = 0;
-  int8_t F = 0;
-  int8_t SW1 = 0;
-  int16_t X1 = 0;
-  int16_t Y1 = 0;
-  int8_t SW2 = 0;
-  int16_t X2 = 0;
-  int16_t Y2 = 0;
-} __attribute__((packed));
+const byte address[6] = "CTRL1";
 
-void printData(const JoyStickPadData &data) {
-  bool r = 1;
-  char buf[120];
-  sprintf(buf,
-          "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d"
-          "\tSW1:%d\tX1:%d\tY1:%d\tSW2:%d\tX2:%d\tY2:%d",
-          r ? "OK" : "FAIL",
-          data.A, data.B, data.C, data.D,
-          data.E, data.F,
-          data.SW1, data.X1, data.Y1,
-          data.SW2, data.X2, data.Y2);
-  Serial.println(buf);
+struct __attribute__((packed)) Packet {
+  uint8_t buttons;
+  int8_t X1;
+  int8_t Y1;
+  int8_t X2;
+  int8_t Y2;
+  int8_t R1;
+  int8_t R2;
+};
+
+Packet data;
+
+unsigned long lastReceiveTime = 0;
+const unsigned long failsafeTimeout = 500;
+
+void failsafe() {
+
+  data.buttons = 0;
+  data.X1 = 0;
+  data.Y1 = 0;
+  data.X2 = 0;
+  data.Y2 = 0;
+  data.R1 = 0;
+  data.R2 = 0;
+}
+
+void logPacket() {
+
+  Serial.print("OK ");
+
+  Serial.print("B:");
+  Serial.print(data.buttons);
+
+  Serial.print(" X1:");
+  Serial.print(data.X1);
+  Serial.print(" Y1:");
+  Serial.print(data.Y1);
+
+  Serial.print(" X2:");
+  Serial.print(data.X2);
+  Serial.print(" Y2:");
+  Serial.print(data.Y2);
+
+  Serial.print(" R1:");
+  Serial.print(data.R1);
+  Serial.print(" R2:");
+  Serial.println(data.R2);
 }
 
 void setup() {
+
   Serial.begin(115200);
+
   radio.begin();
-  radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_HIGH);
+  radio.setDataRate(RF24_1MBPS);
+  radio.openReadingPipe(0, address);
   radio.startListening();
 }
 
 void loop() {
+
   if (radio.available()) {
-    JoyStickPadData data;
+
     radio.read(&data, sizeof(data));
-    printData(data);
+
+    lastReceiveTime = millis();
+
+    logPacket();
+  }
+
+  if (millis() - lastReceiveTime > failsafeTimeout) {
+    failsafe();
   }
 }
