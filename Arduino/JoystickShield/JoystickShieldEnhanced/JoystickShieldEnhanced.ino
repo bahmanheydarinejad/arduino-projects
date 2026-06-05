@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <RF24.h>
+#include <string.h>
 
 /* ============================================================
    CONFIGURATION
@@ -17,17 +18,30 @@ static const uint16_t FAILSAFE_TIMEOUT_MS = 500;
 
 
 /* ============================================================
-   PACKET
-   8 bytes total
+   LOGGER (prints only when message changes)
+   ============================================================ */
 
-   byte0: counter
-   byte1: joy1x
-   byte2: joy1y
-   byte3: joy2x
-   byte4: joy2y
-   byte5: range1
-   byte6: range2
-   byte7: buttons[0..5] + crc[6..7]
+class Logger
+{
+private:
+  String lastMessage;
+
+public:
+  void log(const String &msg)
+  {
+    if (msg != lastMessage)
+    {
+      lastMessage = msg;
+      Serial.println(msg);
+    }
+  }
+};
+
+Logger logger;
+
+
+/* ============================================================
+   PACKET
    ============================================================ */
 
 struct ControlPacket
@@ -56,8 +70,7 @@ private:
 public:
   LowPassFilter(uint8_t smoothFactor = 4)
     : factor(smoothFactor), filtered(0)
-  {
-  }
+  {}
 
   void begin(int initialValue)
   {
@@ -84,8 +97,7 @@ private:
 public:
   DeadZoneFilter(uint8_t deadzone = 6)
     : zone(deadzone)
-  {
-  }
+  {}
 
   uint8_t apply(uint8_t value) const
   {
@@ -111,13 +123,11 @@ private:
 public:
   AnalogAxis()
     : pin(A0), lowPass(SMOOTH_FACTOR), deadZone(DEADZONE)
-  {
-  }
+  {}
 
   AnalogAxis(uint8_t analogPin)
     : pin(analogPin), lowPass(SMOOTH_FACTOR), deadZone(DEADZONE)
-  {
-  }
+  {}
 
   void attach(uint8_t analogPin)
   {
@@ -139,7 +149,7 @@ public:
   uint8_t get8bit() const
   {
     int filtered = lowPass.current();
-    int scaled = filtered >> 2;   // 0..1023 -> 0..255
+    int scaled = filtered >> 2;
 
     if (scaled < 0) scaled = 0;
     if (scaled > 255) scaled = 255;
@@ -158,13 +168,11 @@ private:
 public:
   DigitalButton()
     : pin(2), state(HIGH), previous(HIGH)
-  {
-  }
+  {}
 
   DigitalButton(uint8_t digitalPin)
     : pin(digitalPin), state(HIGH), previous(HIGH)
-  {
-  }
+  {}
 
   void attach(uint8_t digitalPin)
   {
@@ -211,7 +219,7 @@ public:
     for (uint8_t i = 0; i < 7; ++i)
       crc ^= data[i];
 
-    return crc & 0x03; // 2-bit CRC
+    return crc & 0x03;
   }
 
   static void finalize(ControlPacket &packet, uint8_t buttonsMask)
@@ -257,7 +265,7 @@ public:
   JoystickController()
     : joy1x(A0), joy1y(A1),
       joy2x(A2), joy2y(A3),
-      range1(A4), range2(A5),
+      // range1(A4), range2(A5),
       buttons{
         DigitalButton(2),
         DigitalButton(3),
@@ -267,8 +275,7 @@ public:
         DigitalButton(7)
       },
       packetCounter(0)
-  {
-  }
+  {}
 
   void begin()
   {
@@ -336,8 +343,7 @@ private:
 public:
   FailSafeMonitor()
     : lastReceiveTime(0)
-  {
-  }
+  {}
 
   void begin()
   {
@@ -370,12 +376,17 @@ public:
   RadioLink()
     : radio(CE_PIN, CSN_PIN),
       pipeAddress{'N','O','D','E','1','\0'}
-  {
-  }
+  {}
 
   void beginCommon()
   {
-    radio.begin();
+    bool ok = radio.begin();
+
+    if (ok)
+      logger.log("NRF24 INIT OK");
+    else
+      logger.log("NRF24 INIT FAIL");
+
     radio.setPALevel(RF24_PA_LOW);
     radio.setDataRate(RF24_2MBPS);
     radio.setChannel(108);
@@ -423,13 +434,18 @@ private:
   RadioLink radio;
   JoystickController joystick;
   ControlPacket packet;
+  ControlPacket lastPacket;
   unsigned long lastTxTime;
+
+  bool packetChanged()
+  {
+    return memcmp(&packet, &lastPacket, sizeof(ControlPacket)) != 0;
+  }
 
 public:
   TransmitterApp()
     : lastTxTime(0)
-  {
-  }
+  {}
 
   void begin()
   {
@@ -451,25 +467,37 @@ public:
 
       bool ok = radio.send(packet);
 
-      Serial.print(F("TX "));
-      Serial.print(packet.counter);
-      Serial.print(F(" "));
-      Serial.print(ok ? F("OK ") : F("FAIL "));
+      if (packetChanged())
+      {
+        lastPacket = packet;
 
-      Serial.print(F("J1("));
-      Serial.print(packet.joy1x);
-      Serial.print(F(","));
-      Serial.print(packet.joy1y);
-      Serial.print(F(") J2("));
-      Serial.print(packet.joy2x);
-      Serial.print(F(","));
-      Serial.print(packet.joy2y);
-      Serial.print(F(") R("));
-      Serial.print(packet.range1);
-      Serial.print(F(","));
-      Serial.print(packet.range2);
-      Serial.print(F(") B:"));
-      Serial.println(PacketCodec::getButtons(packet), BIN);
+        String msg = "TX ";
+        msg += packet.counter;
+        msg += ok ? " OK " : " FAIL ";
+
+        msg += "J1(";
+        msg += packet.joy1x;
+        msg += ",";
+        msg += packet.joy1y;
+        msg += ") ";
+
+        msg += "J2(";
+        msg += packet.joy2x;
+        msg += ",";
+        msg += packet.joy2y;
+        msg += ") ";
+
+        msg += "R(";
+        msg += packet.range1;
+        msg += ",";
+        msg += packet.range2;
+        msg += ") ";
+
+        msg += "B:";
+        msg += String(PacketCodec::getButtons(packet), BIN);
+
+        logger.log(msg);
+      }
     }
   }
 };
@@ -480,13 +508,13 @@ private:
   RadioLink radio;
   FailSafeMonitor failsafe;
   ControlPacket packet;
+  ControlPacket lastPacket;
   bool failsafePrinted;
 
 public:
   ReceiverApp()
     : failsafePrinted(false)
-  {
-  }
+  {}
 
   void begin()
   {
@@ -505,34 +533,49 @@ public:
         failsafe.markPacketReceived();
         failsafePrinted = false;
 
-        Serial.print(F("RX "));
-        Serial.print(packet.counter);
+        bool changed = memcmp(&packet, &lastPacket, sizeof(ControlPacket)) != 0;
 
-        Serial.print(F(" J1("));
-        Serial.print(packet.joy1x);
-        Serial.print(F(","));
-        Serial.print(packet.joy1y);
-        Serial.print(F(") J2("));
-        Serial.print(packet.joy2x);
-        Serial.print(F(","));
-        Serial.print(packet.joy2y);
-        Serial.print(F(") R("));
-        Serial.print(packet.range1);
-        Serial.print(F(","));
-        Serial.print(packet.range2);
-        Serial.print(F(") B:"));
-        Serial.println(PacketCodec::getButtons(packet), BIN);
+        if (changed)
+        {
+          lastPacket = packet;
+
+          String msg = "RX ";
+          msg += packet.counter;
+
+          msg += " J1(";
+          msg += packet.joy1x;
+          msg += ",";
+          msg += packet.joy1y;
+          msg += ")";
+
+          msg += " J2(";
+          msg += packet.joy2x;
+          msg += ",";
+          msg += packet.joy2y;
+          msg += ")";
+
+          msg += " R(";
+          msg += packet.range1;
+          msg += ",";
+          msg += packet.range2;
+          msg += ")";
+
+          msg += " B:";
+          msg += String(PacketCodec::getButtons(packet), BIN);
+
+          logger.log(msg);
+        }
       }
       else
       {
-        Serial.println(F("CRC FAIL"));
+        logger.log("CRC FAIL");
       }
     }
 
     if (failsafe.isSignalLost() && !failsafePrinted)
     {
       failsafePrinted = true;
-      Serial.println(F("FAILSAFE: SIGNAL LOST"));
+      logger.log("FAILSAFE: SIGNAL LOST");
     }
   }
 };
