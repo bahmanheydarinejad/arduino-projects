@@ -1,3 +1,5 @@
+<!-- جهت کلی سند فارسی است. dir یک ویژگی استاندارد HTML و سازگار با GitHub است. -->
+<div dir="rtl" lang="fa" align="right">
 # طرح ارتباط Joystick Shield با nRF24L01+
 
 > وضعیت این سند: پیشنهاد طراحی برای بازبینی. در این مرحله هیچ تغییری در کد فرستنده یا گیرنده اعمال نشده است.
@@ -165,7 +167,7 @@ nRF24L01+ RSSI عددی ندارد. بیت RPD فقط می‌گوید توان �
 
 فرستنده:
 
-`BOOT/CALIBRATE → LOAD_PAIR → SESSION_SYNC → CONNECTED ↔ DEGRADED → LOST`
+<p dir="ltr" align="left"><code>BOOT/CALIBRATE → LOAD_PAIR → SESSION_SYNC → CONNECTED ↔ DEGRADED → LOST</code></p>
 
 - در همهٔ حالت‌ها loop زنده می‌ماند و ورودی‌ها اسکن می‌شوند.
 - در `CONNECTED/DEGRADED` هر deadline پنجاه‌میلی‌ثانیه‌ای heartbeat فرستاده می‌شود.
@@ -174,7 +176,9 @@ nRF24L01+ RSSI عددی ندارد. بیت RPD فقط می‌گوید توان �
 
 گیرنده:
 
-`BOOT → LOAD_PAIR → LISTEN → VALIDATE → APPLY_STATE` و در timeout وارد `FAILSAFE` می‌شود. فقط packet دارای MAC و sequence معتبر watchdog ارتباط را refresh می‌کند؛ دریافت noise یا packet pair دیگر نباید از failsafe جلوگیری کند.
+<p dir="ltr" align="left"><code>BOOT → LOAD_PAIR → LISTEN → VALIDATE → APPLY_STATE</code></p>
+
+گیرنده در timeout وارد `FAILSAFE` می‌شود. فقط packet دارای MAC و sequence معتبر watchdog ارتباط را refresh می‌کند؛ دریافت noise یا packet pair دیگر نباید از failsafe جلوگیری کند.
 
 ## 9. تنظیمات اولیهٔ رادیو
 
@@ -215,3 +219,4 @@ nRF24L01+ RSSI عددی ندارد. بیت RPD فقط می‌گوید توان �
 - [RF24 class reference: Auto-ACK، retry، ACK payload و محدودیت payload](https://rf24.readthedocs.io/en/latest/classRF24.html)
 - [RF24 ACK payload example](https://rf24.readthedocs.io/en/v1.4.11/examples_2AcknowledgementPayloads_2AcknowledgementPayloads_8ino-example.html)
 
+</div>
