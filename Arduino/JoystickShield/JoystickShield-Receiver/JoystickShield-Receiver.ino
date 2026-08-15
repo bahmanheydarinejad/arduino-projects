@@ -13,6 +13,7 @@ struct JoyStickPadData {
   int8_t D = 0;
   int8_t E = 0;
   int8_t F = 0;
+
   int8_t SW1 = 0;
   int16_t X1 = 0;
   int16_t Y1 = 0;
@@ -40,6 +41,9 @@ void setup() {
   radio.begin();
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_HIGH);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setChannel(108);
+  radio.setCRCLength(RF24_CRC_16);
   radio.startListening();
 }
 

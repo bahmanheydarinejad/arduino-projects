@@ -3,226 +3,172 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-// Precision for joystick neutrality
-const int16_t joystickPrecision = 15;
-const int16_t surfaceBound = joystickPrecision;
-const int16_t floorBound = -joystickPrecision;
-
-// Struct to hold all input states
-struct JoyStickPadData {
-  int8_t A = 0;
-  int8_t B = 0;
-  int8_t C = 0;
-  int8_t D = 0;
-  int8_t E = 0;
-  int8_t F = 0;
-  int8_t SW1 = 0;
-  int16_t X1 = 0;
-  int16_t Y1 = 0;
-  int8_t SW2 = 0;
-  int16_t X2 = 0;
-  int16_t Y2 = 0;
-} __attribute__((packed));
-
-// Abstract updateable interface
-class Updatable {
-public:
-  virtual void update() = 0;
-  virtual bool isChanged() = 0;
-  virtual ~Updatable() {}
-};
-
-// Button base class
-class Button : public Updatable {
-protected:
-  int pin;
-  const char* name;
-  bool lastState;
-  int8_t* value;
-  Updatable* parent;
-
-public:
-  Button(int pin, const char* name, int8_t* value, Updatable* parent)
-    : pin(pin), name(name), lastState(HIGH), value(value), parent(parent) {
-    pinMode(pin, INPUT_PULLUP);
-  }
-
-  bool isChanged() {
-    return *value != 0;
-  }
-
-  void update() override {
-    bool currentState = digitalRead(pin);
-    *value = retrieveAction(currentState);
-    lastState = currentState;
-  }
-
-  int retrieveAction(bool current) {
-    if (isReleased(current)) return 3;      // Released
-    else if (isPressed(current)) return 2;  // Pressed
-    else if (isHold(current)) return 1;     // Hold
-    else return 0;                          // Unhold
-  }
-
-  bool isPressed(bool state) {
-    return lastState == HIGH && state == LOW;
-  }
-
-  virtual bool isReleased(bool state) {
-    return lastState == LOW && state == HIGH;
-  }
-
-  virtual bool isHold(bool state) {
-    return lastState == LOW && state == LOW;
-  }
-};
-
-// Joystick class
-class Joystick : public Updatable {
-private:
-  int xPin, yPin;
-  const char* name;
-  int16_t* xValue;
-  int16_t* yValue;
-  Button* swButton;
-  Updatable* parent;
-
-public:
-  Joystick(char* name, int xPin, int yPin, int swPin, int16_t* xValue, int16_t* yValue, int8_t* swValue, Updatable* parent)
-    : name(name), xPin(xPin), yPin(yPin), xValue(xValue), yValue(yValue), parent(parent) {
-    pinMode(xPin, INPUT);
-    pinMode(yPin, INPUT);
-
-    char swName[10];
-    snprintf(swName, sizeof(swName), "%s_SW", name);
-    swButton = new Button(swPin, swName, swValue, this);
-  }
-
-  ~Joystick() {
-    delete swButton;
-  }
-
-  virtual bool isChanged() {
-    bool isXMoved = (*xValue < floorBound) || (*xValue > surfaceBound);
-    bool isYMoved = (*yValue < floorBound) || (*yValue > surfaceBound);
-
-    if (!isXMoved)
-      *xValue = 0;
-
-    if (!isYMoved)
-      *yValue = 0;
-
-    return isXMoved || isYMoved || this->swButton->isChanged();
-  }
-
-  void update() override {
-    *xValue = analogRead(xPin) - 512;
-    *yValue = analogRead(yPin) - 512;
-    this->swButton->update();
-  }
-};
-
-// SimpleJoyStickPad
-class SimpleJoyStickPad : public Updatable {
-private:
-
-  JoyStickPadData data;
-
-  static constexpr int BUTTON_COUNT = 6;
-  Button* buttons[BUTTON_COUNT];
-
-  Joystick* joystick1;
-  Joystick* joystick2;
-
-public:
-  SimpleJoyStickPad(const int* pins) {
-
-    const char* names[BUTTON_COUNT] = { "A", "B", "C", "D", "E", "F" };
-    int8_t* referenceData[BUTTON_COUNT] = { &data.A, &data.B, &data.C, &data.D, &data.E, &data.F };
-    for (int i = 0; i < BUTTON_COUNT; ++i) {
-      buttons[i] = new Button(pins[i], names[i], referenceData[i], this);
-    }
-
-    joystick1 = new Joystick("JS1", pins[6], pins[7], pins[8], &data.X1, &data.Y1, &data.SW1, this);
-    joystick2 = new Joystick("JS2", pins[9], pins[10], pins[11], &data.X2, &data.Y2, &data.SW2, this);
-  }
-
-  ~SimpleJoyStickPad() {
-    for (int i = 0; i < BUTTON_COUNT; i++) delete buttons[i];
-    delete joystick1;
-    delete joystick2;
-  }
-
-  void update() {
-    for (int i = 0; i < BUTTON_COUNT; i++) buttons[i]->update();
-    joystick1->update();
-    joystick2->update();
-  }
-
-  bool isChanged() {
-    bool changed = false;
-    for (int i = 0; i < BUTTON_COUNT; i++) changed = buttons[i]->isChanged() || changed;
-    changed = joystick1->isChanged() || changed;
-    changed = joystick2->isChanged() || changed;
-    return changed;
-  }
-
-public:
-  JoyStickPadData getData() {
-    return data;
-  }
-};
-
-// ====== GLOBALS ======
-RF24 radio(9, 10);  // CE, CSN
+/* ===== RF ===== */
+RF24 radio(9, 10);
 const byte address[6] = "00001";
 
-const int padPins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A3, A4, A5 };
-const int ledStatus = 8;
+/* ===== Constants ===== */
+constexpr int16_t DEADZONE = 15;
 
-SimpleJoyStickPad simplePad(padPins);
+/* ===== Data ===== */
+struct JoyStickPadData {
+    int8_t A, B, C, D, E, F;
+    int8_t SW1;
+    int16_t X1, Y1;
+    int8_t SW2;
+    int16_t X2, Y2;
+} __attribute__((packed));
 
-void setup() {
-  Serial.begin(9600);
+/* ===== Button ===== */
+class Button {
+    int pin;
+    bool last;
+    int8_t *v;
 
-  pinMode(ledStatus, OUTPUT);
-  digitalWrite(ledStatus, LOW);
-  digitalWrite(LED_BUILTIN, LOW);
-
-  radio.begin();
-  radio.openWritingPipe(address);
-  radio.setPALevel(RF24_PA_HIGH);
-  radio.stopListening();
-}
-
-void loop() {
-  simplePad.update();
-  if (simplePad.isChanged()) {
-    bool r = send(simplePad.getData());
-    if (r) {
-      digitalWrite(ledStatus, HIGH);
-    } else {
-      digitalWrite(ledStatus, LOW);
+    public:
+    void begin(int p, int8_t *val) {
+        pin = p;
+        v = val;
+        last = HIGH;
+        pinMode(pin, INPUT_PULLUP);
     }
-  }
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(20);
-  digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(ledStatus, LOW);
+
+    void update() {
+        bool cur = digitalRead(pin);
+        if (last == HIGH && cur == LOW) *v = 2;
+        else if (last == LOW && cur == HIGH) *v = 3;
+        else if (cur == LOW) *v = 1;
+        else *v = 0;
+        last = cur;
+    }
+
+    bool changed() const {
+        return *v != 0;
+    }
+};
+
+/* ===== Joystick ===== */
+class Joystick {
+    int xp, yp;
+    int16_t xc, yc;
+    int16_t *xv, *yv;
+    Button sw;
+
+    public:
+    void begin(int x, int y, int swp, int16_t *xOut, int16_t *yOut, int8_t *swOut) {
+        xp = x;
+        yp = y;
+        xv = xOut;
+        yv = yOut;
+        pinMode(xp, INPUT);
+        pinMode(yp, INPUT);
+        delay(10);
+        xc = analogRead(xp);
+        yc = analogRead(yp);
+        sw.begin(swp, swOut);
+    }
+
+    void update() {
+        int16_t dx = analogRead(xp) - xc;
+        int16_t dy = analogRead(yp) - yc;
+        *xv = (abs(dx) > DEADZONE) ? dx : 0;
+        *yv = (abs(dy) > DEADZONE) ? dy : 0;
+        sw.update();
+    }
+
+    bool changed() const {
+        return *xv || *yv || sw.changed();
+    }
+};
+
+/* ===== Pad ===== */
+class Pad {
+    JoyStickPadData d{};
+    Button btn[6];
+    Joystick j1, j2;
+
+    public:
+    void begin(const int *p) {
+        int8_t *b[6] = { &d.A, &d.B, &d.C, &d.D, &d.E, &d.F };
+        for (int i = 0; i < 6; i++) btn[i].begin(p[i], b[i]);
+        j1.begin(p[6], p[7], p[8], &d.X1, &d.Y1, &d.SW1);
+        j2.begin(p[9], p[10], p[11], &d.X2, &d.Y2, &d.SW2);
+    }
+
+    void update() {
+        for (auto &b : btn) b.update();
+        j1.update();
+        j2.update();
+    }
+
+    bool changed() const {
+        for (auto &b : btn)
+        if (b.changed()) return true;
+        return j1.changed() || j2.changed();
+    }
+
+    const JoyStickPadData &data() const {
+        return d;
+    }
+};
+
+/* ===== Globals ===== */
+const int pins[] = { 2, 3, 4, 5, 6, 7, A0, A1, A2, A3, A4, A5 };
+Pad pad;
+
+/* ===== Setup ===== */
+void setup() {
+    Serial.begin(9600);
+    SPI.begin();
+    pad.begin(pins);
+
+    radio.begin();
+    radio.setPALevel(RF24_PA_HIGH);
+    radio.setDataRate(RF24_250KBPS);
+    radio.setChannel(108);
+    radio.setCRCLength(RF24_CRC_16);
+    radio.setRetries(5, 15);
+    radio.openWritingPipe(address);
+    radio.stopListening();
+
+    Serial.println("Sender ready");
 }
 
-bool send(const JoyStickPadData& data) {
-  bool r = radio.write(&data, sizeof(data));
+/* ===== Loop ===== */
+void loop() {
+    pad.update();
 
-  char buf[120];
-  sprintf(buf,
-          "Status:%s\tA:%d\tB:%d\tC:%d\tD:%d\tE:%d\tF:%d"
-          "\tSW1:%d\tX1:%d\tY1:%d\tSW2:%d\tX2:%d\tY2:%d",
-          r ? "OK" : "FAIL",
-          data.A, data.B, data.C, data.D,
-          data.E, data.F,
-          data.SW1, data.X1, data.Y1,
-          data.SW2, data.X2, data.Y2);
-  Serial.println(buf);
-  return r;
+    if (pad.changed()) {
+    radio.write(&pad.data(), sizeof(JoyStickPadData));
+
+    // Portable logging using only Serial.print
+    Serial.print("A:");
+    Serial.print(pad.data().A);
+    Serial.print(" B:");
+    Serial.print(pad.data().B);
+    Serial.print(" C:");
+    Serial.print(pad.data().C);
+    Serial.print(" D:");
+    Serial.print(pad.data().D);
+    Serial.print(" E:");
+    Serial.print(pad.data().E);
+    Serial.print(" F:");
+    Serial.print(pad.data().F);
+
+    Serial.print(" | X1:");
+    Serial.print(pad.data().X1);
+    Serial.print(" Y1:");
+    Serial.print(pad.data().Y1);
+    Serial.print(" SW1:");
+    Serial.print(pad.data().SW1);
+
+    Serial.print(" | X2:");
+    Serial.print(pad.data().X2);
+    Serial.print(" Y2:");
+    Serial.print(pad.data().Y2);
+    Serial.print(" SW2:");
+    Serial.println(pad.data().SW2);
+}
+
+    delay(20);
 }
