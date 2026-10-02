@@ -1,0 +1,29 @@
+services:
+  # Raspberry Pi 4 (ARM64 / AArch64 Linux - Debian Bookworm / Raspberry Pi OS)
+  rpi4:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.rpi4
+    platform: linux/arm64
+    volumes:
+      - .:/src:ro
+      - ./dist/rpi4:/output
+
+  # Linux Desktop (x86_64 / amd64 - Ubuntu / Debian)
+  linux-x64:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.linux-x64
+    platform: linux/amd64
+    volumes:
+      - .:/src:ro
+      - ./dist/linux-x64:/output
+
+  # Windows (x86_64 .exe + bundled Qt DLLs via MinGW & windeployqt)
+  windows:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.windows
+    volumes:
+      - .:/src:ro
+      - ./dist/windows:/output

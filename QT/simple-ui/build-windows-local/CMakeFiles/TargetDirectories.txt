@@ -1,0 +1,5 @@
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/CMakeFiles/simple-ui.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/CMakeFiles/edit_cache.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/CMakeFiles/rebuild_cache.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/CMakeFiles/simple-ui_autogen_timestamp_deps.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/CMakeFiles/simple-ui_autogen.dir

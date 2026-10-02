@@ -1,0 +1,12 @@
+# ninja log v6
+24	1064	8126586340942372	simple-ui_autogen/timestamp	abce5c5e9feea86c
+24	1064	8126586340942372	simple-ui_autogen/mocs_compilation.cpp	abce5c5e9feea86c
+24	1064	8126586340942372	C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/simple-ui_autogen/timestamp	abce5c5e9feea86c
+24	1064	8126586340942372	C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/simple-ui_autogen/mocs_compilation.cpp	abce5c5e9feea86c
+1095	1214	8126586344158013	simple-ui_autogen/EWIEGA46WW/qrc_qml.cpp	a6d9a31e9f9c1372
+1095	1214	8126586344158013	C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build-windows-local/simple-ui_autogen/EWIEGA46WW/qrc_qml.cpp	a6d9a31e9f9c1372
+1279	2000	8126586344977610	CMakeFiles/simple-ui.dir/simple-ui_autogen/EWIEGA46WW/qrc_qml.cpp.obj	9e76704de7fd126c
+1214	5329	8126586344335603	CMakeFiles/simple-ui.dir/simple-ui_autogen/mocs_compilation.cpp.obj	dc0bd49b95240eed
+1254	5544	8126586344736522	CMakeFiles/simple-ui.dir/iotbackend.cpp.obj	cbfd22e35e4762ea
+1232	5701	8126586344516747	CMakeFiles/simple-ui.dir/main.cpp.obj	3877d394c42d37b2
+5702	5964	8126586389214393	simple-ui.exe	faa9d7d33bda32cb

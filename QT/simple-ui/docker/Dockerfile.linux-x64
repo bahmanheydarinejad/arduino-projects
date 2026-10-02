@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+FROM --platform=linux/amd64 ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build tools & Qt 6 development libraries for standard x86_64 Linux
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    ninja-build \
+    qt6-base-dev \
+    qt6-declarative-dev \
+    libqt6quick6 \
+    libqt6qml6 \
+    qml6-module-qtquick \
+    qml6-module-qtquick-controls \
+    qml6-module-qtquick-layouts \
+    qml6-module-qtquick-window \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+CMD ["sh", "-c", "mkdir -p /tmp/build && cd /tmp/build && cmake /src -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build . && mkdir -p /output && cp simple-ui /output/simple-ui && chmod +x /output/simple-ui && echo '>>> [SUCCESS] Linux x86_64 binary generated at /output/simple-ui'"]
