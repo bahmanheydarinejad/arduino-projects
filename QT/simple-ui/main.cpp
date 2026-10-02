@@ -1,7 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QIcon>
 #include "iotbackend.h"
 
 int main(int argc, char *argv[])

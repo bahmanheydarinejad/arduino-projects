@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  ".qt/rcc/qrc_appwiazard_raw_qml_0.cpp"
+  ".qt/rcc/qrc_qmake_wiazard.cpp"
+  ".rcc/qmlcache/appwiazard_Main_qml.cpp"
+  ".rcc/qmlcache/appwiazard_Main_qml.cpp.aotstats"
+  ".rcc/qmlcache/appwiazard_qmlcache_loader.cpp"
+  "CMakeFiles/appwiazard_autogen.dir/AutogenUsed.txt"
+  "CMakeFiles/appwiazard_autogen.dir/ParseCache.txt"
+  "appwiazard_autogen"
+  "CMakeFiles/appwiazard.dir/appwiazard_autogen/mocs_compilation.cpp.obj"
+  "CMakeFiles/appwiazard.dir/appwiazard_autogen/mocs_compilation.cpp.obj.d"
+  "CMakeFiles/appwiazard.dir/appwiazard_qmltyperegistrations.cpp.obj"
+  "CMakeFiles/appwiazard.dir/appwiazard_qmltyperegistrations.cpp.obj.d"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/qrc_appwiazard_raw_qml_0.cpp.obj"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/qrc_appwiazard_raw_qml_0.cpp.obj.d"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/qrc_qmake_wiazard.cpp.obj"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/qrc_qmake_wiazard.cpp.obj.d"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.rcc/qmlcache/appwiazard_Main_qml.cpp.obj"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.rcc/qmlcache/appwiazard_Main_qml.cpp.obj.d"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.rcc/qmlcache/appwiazard_qmlcache_loader.cpp.obj"
+  "CMakeFiles/appwiazard.dir/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.rcc/qmlcache/appwiazard_qmlcache_loader.cpp.obj.d"
+  "CMakeFiles/appwiazard.dir/main.cpp.obj"
+  "CMakeFiles/appwiazard.dir/main.cpp.obj.d"
+  "appwiazard.exe"
+  "appwiazard.exe.manifest"
+  "appwiazard.pdb"
+  "appwiazard_autogen/mocs_compilation.cpp"
+  "appwiazard_autogen/timestamp"
+  "appwiazard_qmltyperegistrations.cpp"
+  "libappwiazard.dll.a"
+  "meta_types/appwiazard_json_file_list.txt"
+  "meta_types/appwiazard_json_file_list.txt.timestamp"
+  "meta_types/qt6appwiazard_metatypes.json"
+  "meta_types/qt6appwiazard_metatypes.json.gen"
+  "wiazard/appwiazard.qmltypes"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/appwiazard.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

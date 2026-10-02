@@ -1,5 +1,6 @@
 #include "iotbackend.h"
 #include <QRandomGenerator>
+#include <algorithm>
 
 IoTBackend::IoTBackend(QObject *parent)
     : QObject(parent),
@@ -41,7 +42,7 @@ void IoTBackend::setRelay2(bool on)
 
 void IoTBackend::setFanSpeed(int speed)
 {
-    int clamped = qBound(0, speed, 100);
+    int clamped = std::clamp(speed, 0, 100);
     if (m_fanSpeed != clamped) {
         m_fanSpeed = clamped;
         emit fanSpeedChanged(m_fanSpeed);
@@ -51,7 +52,7 @@ void IoTBackend::setFanSpeed(int speed)
 
 void IoTBackend::setBrightness(int val)
 {
-    int clamped = qBound(0, val, 100);
+    int clamped = std::clamp(val, 0, 100);
     if (m_brightness != clamped) {
         m_brightness = clamped;
         emit brightnessChanged(m_brightness);
@@ -114,16 +115,16 @@ void IoTBackend::onSimulateTelemetry()
 
     // Small random perturbations to simulate real sensor readings
     double tempDelta = (QRandomGenerator::global()->bounded(20) - 10) / 10.0 * 0.15;
-    m_temperature = qBound(18.0, m_temperature + tempDelta, 35.0);
+    m_temperature = std::clamp(m_temperature + tempDelta, 18.0, 35.0);
 
     double humDelta = (QRandomGenerator::global()->bounded(20) - 10) / 10.0 * 0.3;
-    m_humidity = qBound(30.0, m_humidity + humDelta, 80.0);
+    m_humidity = std::clamp(m_humidity + humDelta, 30.0, 80.0);
 
     double voltDelta = (QRandomGenerator::global()->bounded(6) - 3) * 0.01;
-    m_voltage = qBound(3.20, 3.31 + voltDelta, 3.35);
+    m_voltage = std::clamp(3.31 + voltDelta, 3.20, 3.35);
 
     int rssiDelta = QRandomGenerator::global()->bounded(5) - 2;
-    m_rssi = qBound(-85, m_rssi + rssiDelta, -45);
+    m_rssi = std::clamp(m_rssi + rssiDelta, -85, -45);
 
     m_lastUpdated = QDateTime::currentDateTime().toString("hh:mm:ss");
 

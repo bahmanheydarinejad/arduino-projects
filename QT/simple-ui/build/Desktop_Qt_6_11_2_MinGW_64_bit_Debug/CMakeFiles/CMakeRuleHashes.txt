@@ -1,0 +1,4 @@
+# Hashes of file build rules.
+3da0fbebdfe73b87f49e3fa290e51678 CMakeFiles/simple-ui_autogen
+51c8f26ebda04aecfa2ec2111b53d07a simple-ui_autogen/EWIEGA46WW/qrc_qml.cpp
+b54eb3b7817837ac0e689c0193d30395 simple-ui_autogen/timestamp

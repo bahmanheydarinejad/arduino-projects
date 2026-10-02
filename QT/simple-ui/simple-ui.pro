@@ -14,13 +14,13 @@ HEADERS += \
 RESOURCES += \
     qml.qrc
 
+DISTFILES += \
+    main.qml \
+    DashboardCard.qml \
+    IoTControlRow.qml
+
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
 # Additional include directories
 INCLUDEPATH += $$PWD
-
-# Default rules for deployment
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target

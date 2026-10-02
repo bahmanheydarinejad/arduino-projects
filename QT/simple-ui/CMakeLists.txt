@@ -21,6 +21,9 @@ set(PROJECT_SOURCES
     iotbackend.h
     iotbackend.cpp
     qml.qrc
+    main.qml
+    DashboardCard.qml
+    IoTControlRow.qml
 )
 
 add_executable(simple-ui ${PROJECT_SOURCES})

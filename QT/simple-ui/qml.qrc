@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>DashboardCard.qml</file>
         <file>IoTControlRow.qml</file>
+        <file>qmldir</file>
     </qresource>
 </RCC>

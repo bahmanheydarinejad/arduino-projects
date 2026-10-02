@@ -1,0 +1,232 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-527ce15d8725939412dd.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "wiazard",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "all_aotstats::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_aotstats-Debug-d2acb066456993f5982c.json",
+					"name" : "all_aotstats",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmllint::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmllint-Debug-55938de9a30c509bd25b.json",
+					"name" : "all_qmllint",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmllint_json::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmllint_json-Debug-f8896a49fa065f898532.json",
+					"name" : "all_qmllint_json",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmllint_module::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmllint_module-Debug-80e61e77e4db740e512d.json",
+					"name" : "all_qmllint_module",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmltyperegistrations::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmltyperegistrations-Debug-8b3bdc8da603eb1edc9c.json",
+					"name" : "all_qmltyperegistrations",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard-Debug-91c1e654be7a46abb9c5.json",
+					"name" : "appwiazard",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_autogen-Debug-8703e126992097c4d431.json",
+					"name" : "appwiazard_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_autogen_timestamp_deps-Debug-c8e616d35c322ee8bb06.json",
+					"name" : "appwiazard_autogen_timestamp_deps",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_copy_qml::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_copy_qml-Debug-2191c1599ef266ce168e.json",
+					"name" : "appwiazard_copy_qml",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_copy_res::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_copy_res-Debug-75860d761e510a878142.json",
+					"name" : "appwiazard_copy_res",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_generate_qmlls_ini_file::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_generate_qmlls_ini_file-Debug-ccc574ce1fad420022fd.json",
+					"name" : "appwiazard_generate_qmlls_ini_file",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_qmlimportscan::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_qmlimportscan-Debug-4059c3f040e69f671e57.json",
+					"name" : "appwiazard_qmlimportscan",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_qmllint::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_qmllint-Debug-fb9f750247f6aaee7968.json",
+					"name" : "appwiazard_qmllint",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_qmllint_json::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_qmllint_json-Debug-1207ed3e71b012bceda6.json",
+					"name" : "appwiazard_qmllint_json",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_qmllint_module::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_qmllint_module-Debug-ce17b5fcd12ffd0c9ef5.json",
+					"name" : "appwiazard_qmllint_module",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "appwiazard_qmltyperegistration::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appwiazard_qmltyperegistration-Debug-2e6999f6ba2dbc6a4f37.json",
+					"name" : "appwiazard_qmltyperegistration",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "clean_qml_context_properties::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-clean_qml_context_properties-Debug-f3bde4ca4d0dc3824bd6.json",
+					"name" : "clean_qml_context_properties",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "dump_qml_context_properties::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-dump_qml_context_properties-Debug-da454bce62960d7de272.json",
+					"name" : "dump_qml_context_properties",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "generate_qmlls_build_ini_file::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-generate_qmlls_build_ini_file-Debug-37cab2a9829ee01fa7b9.json",
+					"name" : "generate_qmlls_build_ini_file",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "module_appwiazard_aotstats_target::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-module_appwiazard_aotstats_target-Debug-a49a0e66cf7854558a52.json",
+					"name" : "module_appwiazard_aotstats_target",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug",
+		"source" : "C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

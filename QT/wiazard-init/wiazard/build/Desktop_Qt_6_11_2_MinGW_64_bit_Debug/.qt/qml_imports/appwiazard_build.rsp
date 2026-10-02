@@ -1,0 +1,14 @@
+-rootPath
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard
+-cmake-output
+-output-file
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/qml_imports/appwiazard_build.cmake
+-importPath
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug
+-importPath
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/wiazard
+-importPath
+C:/Qt/6.11.2/mingw_64/qml
+-qrcFiles
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/qmake_wiazard.qrc
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/appwiazard_raw_qml_0.qrc

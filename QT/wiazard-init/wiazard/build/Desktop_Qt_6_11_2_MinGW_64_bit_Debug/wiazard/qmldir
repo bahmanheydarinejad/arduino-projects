@@ -1,0 +1,6 @@
+module wiazard
+typeinfo appwiazard.qmltypes
+prefer :/qt/qml/wiazard/
+Main 254.0 Main.qml
+depends QtQuick
+

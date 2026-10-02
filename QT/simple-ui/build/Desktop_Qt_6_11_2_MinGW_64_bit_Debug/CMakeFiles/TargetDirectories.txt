@@ -1,0 +1,5 @@
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/CMakeFiles/simple-ui.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/CMakeFiles/edit_cache.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/CMakeFiles/simple-ui_autogen_timestamp_deps.dir
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/simple-ui/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/CMakeFiles/simple-ui_autogen.dir

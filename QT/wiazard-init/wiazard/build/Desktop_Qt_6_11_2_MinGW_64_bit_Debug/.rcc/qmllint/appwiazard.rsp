@@ -1,0 +1,14 @@
+--bare
+-I
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug
+-I
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/wiazard
+-I
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug
+-I
+C:/Qt/6.11.2/mingw_64/qml
+--resource
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/qmake_wiazard.qrc
+--resource
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/build/Desktop_Qt_6_11_2_MinGW_64_bit_Debug/.qt/rcc/appwiazard_raw_qml_0.qrc
+C:/Users/parse-it/Documents/Git/arduino-projects/QT/wiazard-init/wiazard/Main.qml
