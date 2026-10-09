@@ -2201,6 +2201,7 @@
 - `MCUFRIEND_kbv`
 
 ### 🌐 پیوندهای مرجع و دیتاشیت
+- 🧪 **دستور کار آزمایشگاهی و تست:** [مشاهده دستور کار تعاملی (index.html)](./tests/NodeMCU_ESP8266_TFT3.5_ILI9486/index.html) | [کد اسکتچ آردوینو (.ino)](./tests/NodeMCU_ESP8266_TFT3.5_ILI9486/NodeMCU_ESP8266_TFT3.5_ILI9486.ino)
 - 📄 **دیتاشیت / مستندات سازنده:** [ILI9486L / ILI9488 Display Controller Datasheet](https://www.displayfuture.com/Display/datasheet/controller/ILI9486L.pdf)
 - 🛒 **صفحه خرید محصول (Cafe Robot):** [ماژول نمایشگر TFT تمام رنگ 3.5 اینچ دارای ارتباط SPI و چیپ درایور ILI9486L](https://thecaferobot.com/store/3-5-inch-8pin-spi-tft-lcd-module-with-ili9488-driver)
 

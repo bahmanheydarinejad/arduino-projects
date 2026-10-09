@@ -1378,7 +1378,10 @@
             }
 
             const testLabBtn = document.getElementById('mTestLabLink');
-            if (item.sku === 'LCD-01-280' || item.sku === 'COM-03-009') {
+            if (item.sku === 'LCD-01-180') {
+                testLabBtn.href = './tests/NodeMCU_ESP8266_TFT3.5_ILI9486/index.html';
+                testLabBtn.style.display = 'inline-flex';
+            } else if (item.sku === 'LCD-01-280' || item.sku === 'COM-03-009') {
                 testLabBtn.href = './tests/NodeMCU_ESP8266_TFT2.8_Touch/index.html';
                 testLabBtn.style.display = 'inline-flex';
             } else {
