@@ -507,6 +507,7 @@
 - `ArduinoJson.h`
 
 ### 🌐 پیوندهای مرجع و دیتاشیت
+- 🧪 **دستور کار آزمایشگاهی و تست:** [مشاهده دستور کار تعاملی (index.html)](./tests/NodeMCU_ESP8266_TFT2.8_Touch/index.html) | [کد اسکتچ آردوینو (.ino)](./tests/NodeMCU_ESP8266_TFT2.8_Touch/NodeMCU_ESP8266_TFT2.8_Touch.ino)
 - 📄 **دیتاشیت / مستندات سازنده:** [ESP8266-12E/12F + CH340 Datasheet](https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf)
 - 🛒 **صفحه خرید محصول (Cafe Robot):** [برد توسعه NodeMcu دارای هسته وای فای ESP8266 و مبدل CH340](https://thecaferobot.com/store/nodemcu-lua-serial-wifi-module-esp8266)
 
@@ -2617,6 +2618,7 @@
 - `TFT_eSPI`
 
 ### 🌐 پیوندهای مرجع و دیتاشیت
+- 🧪 **دستور کار آزمایشگاهی و تست:** [مشاهده دستور کار تعاملی (index.html)](./tests/NodeMCU_ESP8266_TFT2.8_Touch/index.html) | [کد اسکتچ آردوینو (.ino)](./tests/NodeMCU_ESP8266_TFT2.8_Touch/NodeMCU_ESP8266_TFT2.8_Touch.ino)
 - 📄 **دیتاشیت / مستندات سازنده:** [ILI9341 / ST7789 + XPT2046 Touch Datasheet](https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf)
 - 🛒 **صفحه خرید محصول (Cafe Robot):** [ماژول نمایشگر 2.8 اینچ TFT لمسی تمام رنگ دارای ارتباط SPI ورژن 1.2](https://thecaferobot.com/store/2-8-inch-full-color-touch-tft-lcd-with-spi-interface-v12)
 
